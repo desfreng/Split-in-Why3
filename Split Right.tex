@@ -1,0 +1,136 @@
+\documentclass[12pt]{article}
+
+\usepackage[landscape, margin=0.5cm]{geometry}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{multicol}
+\usepackage{titling}
+\usepackage{mathtools}
+
+\pagestyle{empty}
+
+\newcommand{\dbar}{~||~}
+\newcommand{\damp}{~\&\&~}
+\newcommand{\so}{~\texttt{so}~}
+\newcommand{\by}{~\texttt{by}~}
+
+\newcommand{\olet}{\texttt{let}~}
+\newcommand{\oin}{~\texttt{in}~}
+
+\newcommand{\oif}{\texttt{if}~}
+\newcommand{\othen}{~\texttt{then}~}
+\newcommand{\oelse}{~\texttt{else}~}
+
+\newcommand{\omatch}{\texttt{match}~}
+\newcommand{\owith}{~\texttt{with}}
+\newcommand{\oend}{\texttt{end}}
+
+
+\begin{document}
+Formules de base :
+$$
+  \begin{array}{rlclcrlcl}
+    e^+      & (a)               & = & a                                                                  & \qquad & e^+      & (\neg a)              & = & \neg e^- (a)                                                                                                 \\
+    e^-      & (a)               & = & a                                                                  & \qquad & e^-      & (\neg a)              & = & \neg e^+ (a)                                                                                                 \\
+    se^+     & (a)               & = & \{ a \}                                                            & \qquad & se^+     & (\neg a)              & = & \neg se^- (a)                                                                                                \\
+    se^-     & (a)               & = & \{ a \}                                                            & \qquad & se^-     & (\neg a)              & = & \neg se^+ (a)                                                                                                \\
+    sc^{all} & (a)               & = & \{ \}                                                              & \qquad & sc^{all} & (\neg a)              & = & sc^{all} (a)                                                                                                 \\
+    \\
+    e^+      & (a \land b)       & = & e^+ (a) \land e^+ (b)                                              & \qquad & e^+      & (a \lor b)            & = & e^+ (a) \lor e^+ (b)                                                                                         \\
+    e^-      & (a \land b)       & = & e^- (a) \land e^- (b)                                              & \qquad & e^-      & (a \lor b)            & = & e^- (a) \lor e^- (b)                                                                                         \\
+    se^+     & (a \land b)       & = & se^+ (a) \cup se^+ (b)                                             & \qquad & se^+     & (a \lor b)            & = & e^+ (a) \lor se^+ (b)                                                                                        \\
+    se^-     & (a \land b)       & = & e^- (a) \land se^- (b)                                             & \qquad & se^-     & (a \lor b)            & = & se^- (a) \cup se^- (b)                                                                                       \\
+    sc^{all} & (a \land b)       & = & sc^{all} (a) \cup sc^{all} (b)                                     & \qquad & sc^{all} & (a \lor b)            & = & sc^{all} (a) \cup sc^{all} (b)                                                                               \\
+    \\
+    e^+      & (a \rightarrow b) & = & e^- (a) \rightarrow e^+ (b)                                        & \qquad & e^+      & (a \leftrightarrow b) & = & (e^- (a) \rightarrow e^+ (b)) \land (e^- (b) \rightarrow e^+ (a))                                            \\
+    e^-      & (a \rightarrow b) & = & \neg e^+ (a) \lor e^- (b)                                          & \qquad & e^-      & (a \leftrightarrow b) & = & (e^- (a) \land e^-(b)) \lor (\neg e^+ (a) \land \neg e^+ (b))                                                \\
+    se^+     & (a \rightarrow b) & = & e^- (a) \rightarrow se^+ (b)                                       & \qquad & se^+     & (a \leftrightarrow b) & = & (e^- (a) \rightarrow se^+ (b)) \cup (e^- (b) \rightarrow se^+ (a))                                           \\
+    se^-     & (a \rightarrow b) & = & (\neg se^+ (a)) \cup se^- (b)                                      & \qquad & se^-     & (a \leftrightarrow b) & = & (e^- (a) \land se^-(b)) \cup (\neg e^+ (a) \land \neg se^+ (b))                                              \\
+    sc^{all} & (a \rightarrow b) & = & sc^{all} (a) \cup (e^-(a) \rightarrow sc^{all} (b))                & \qquad & sc^{all} & (a \leftrightarrow b) & = & sc^{all} (a) \cup sc^{all} (b) \cup (e^-(a) \rightarrow sc^{all} (b)) \cup (e^-(b) \rightarrow sc^{all} (a)) \\
+    \\
+    e^+      & (\forall x.~ a)   & = & \forall x.~ e^+ (a)                                                & \qquad & e^+      & (\exists x.~ a)       & = & \exists x.~ e^+ (a)                                                                                          \\
+    e^-      & (\forall x.~ a)   & = & \forall x.~ e^- (a)                                                & \qquad & e^-      & (\exists x.~ a)       & = & \exists x.~ e^- (a)                                                                                          \\
+    se^+     & (\forall x.~ a)   & = & \forall x.~ se^+ (a)                                               & \qquad & se^+     & (\exists x.~ a)       & = & \{ \exists x.~ e^+ (a) \}                                                                                    \\
+    se^-     & (\forall x.~ a)   & = & \{ \forall x.~ e^- (a) \}                                          & \qquad & se^-     & (\exists x.~ a)       & = & \exists x.~ se^- (a)                                                                                         \\
+    sc^{all} & (\forall x.~ a)   & = & \forall x.~ sc^{all} (a)                                           & \qquad & sc^{all} & (\exists x.~ a)       & = & \forall x.~ sc^{all} (a)                                                                                     \\
+    \\
+    e^+      & (a \damp b)       & = & e^+ (a) \land (e^- (a) \rightarrow e^+ (b))                        & \qquad & e^+      & (a \dbar b)           & = & e^+ (a) \lor e^+ (b)                                                                                         \\
+    e^-      & (a \damp b)       & = & e^- (a) \land e^- (b)                                              & \qquad & e^-      & (a \dbar b)           & = & e^- (a) \lor (\neg e^+ (a) \land e^- (b))                                                                    \\
+    se^+     & (a \damp b)       & = & se^+ (a) \cup (e^- (a) \rightarrow se^+ (b))                       & \qquad & se^+     & (a \dbar b)           & = & e^+ (a) \lor se^+ (b)                                                                                        \\
+    se^-     & (a \damp b)       & = & e^- (a) \land se^- (b)                                             & \qquad & se^-     & (a \dbar b)           & = & se^- (a) \cup (\neg e^+ (a) \land se^- (b))                                                                  \\
+    sc^{all} & (a \damp b)       & = & sc^{all} (a) \cup (e^-(a) \rightarrow sc^{all} (b))                & \qquad & sc^{all} & (a \dbar b)           & = & sc^{all} (a) \cup (e^+(a) \lor sc^{all} (b))                                                                 \\
+    \\
+    e^+      & (a \so b)         & = & e^+ (a)                                                            & \qquad & e^+      & (a \by b)             & = & e^+ (b)                                                                                                      \\
+    e^-      & (a \so b)         & = & e^- (a) \land e^- (b)                                              & \qquad & e^-      & (a \by b)             & = & e^- (a)                                                                                                      \\
+    se^+     & (a \so b)         & = & se^+ (a)                                                           & \qquad & se^+     & (a \by b)             & = & se^+ (b)                                                                                                     \\
+    se^-     & (a \so b)         & = & e^- (a) \land se^- (b)                                             & \qquad & se^-     & (a \by b)             & = & se^- (a)                                                                                                     \\
+    sc^{all} & (a \so b)         & = & sc^{all} (a) \cup (e^-(a) \rightarrow (se^+(b) \cup sc^{all} (b))) & \qquad & sc^{all} & (a \by b)             & = & sc^{all} (a) \cup sc^{all} (b) \cup (e^-(b) \rightarrow se^+(a))                                             \\
+  \end{array}
+$$
+
+Extension au \texttt{let} :
+$$
+  \begin{array}{rlcl}
+    e^+      & (\olet c = b \oin a) & = & \olet c = b \oin e^+ (a)      \\
+    e^-      & (\olet c = b \oin a) & = & \olet c = b \oin e^- (a)      \\
+    se^+     & (\olet c = b \oin a) & = & \olet c = b \oin se^+ (a)     \\
+    se^-     & (\olet c = b \oin a) & = & \olet c = b \oin se^- (a)     \\
+    sc^{all} & (\olet c = b \oin a) & = & \olet c = b \oin sc^{all} (a) \\
+  \end{array}
+$$
+
+\bigskip
+
+Une ``compilation'' du \texttt{if} dans la logique :
+$$\oif a \othen b \oelse c \equiv (a \rightarrow b) \land (\neg a \rightarrow c) \equiv (a \land b) \lor (\neg a \land c)$$
+
+\bigskip
+
+Extension au \texttt{if} :
+$$
+  \begin{array}{rlcl}
+    e^+      & (\oif a \othen b \oelse c) & = & (e^- (a) \rightarrow e^+ (b)) \land (\neg e^+ (a) \rightarrow e^+ (c))                            \\
+    e^-      & (\oif a \othen b \oelse c) & = & (e^- (a) \land e^- (b)) \lor (\neg e^+ (a) \land e^- (c))                                         \\
+    se^+     & (\oif a \othen b \oelse c) & = & (e^- (a) \rightarrow se^+ (b)) \cup (\neg e^+ (a) \rightarrow se^+ (c))                           \\
+    se^-     & (\oif a \othen b \oelse c) & = & (e^- (a) \land se^- (b)) \cup (\neg e^+ (a) \land se^- (c))                                       \\
+    sc^{all} & (\oif a \othen b \oelse c) & = & sc^{all} (a) \cup (e^- (a) \rightarrow sc^{all} (b)) \cup (\neg e^+ (a) \rightarrow sc^{all} (c)) \\
+  \end{array}
+$$
+
+\bigskip
+
+Une ``compilation'' du \texttt{match} dans la logique :
+$$
+  \begin{array}{rcl}
+    M & \coloneqq &
+    \begin{array}{clcl}
+      \multicolumn{4}{l}{\omatch e \owith} \\
+      ~| & A       & \mapsto & a           \\
+      ~| & B(x)    & \mapsto & b(x)        \\
+      ~| & C(x, y) & \mapsto & c(x, y)     \\
+      ~| & \_      & \mapsto & d           \\
+      \multicolumn{4}{l}{\oend}
+    \end{array}                                                                                                                                                                    \\
+      & \equiv    & \big(e = A \rightarrow a \big) \land \big(\forall x.~ e = B(x) \rightarrow b(x) \big) \land \big(\forall x~y.~ e = C(x, y) \rightarrow c(x,y) \big) \land \big(p(e) \rightarrow d \big) \\[10pt]
+      & \equiv    & \big(e = A \land a \big) \lor \big(\exists x.~ e = B(x) \land b(x) \big) \lor \big(\exists x~y.~ e = C(x, y) \land c(x,y) \big) \lor \big(p(e) \land d \big)                            \\
+  \end{array}
+$$
+
+Avec
+$$ p(e) \coloneqq e \neq A \land (\forall x.~ e \neq B(x)) \land (\forall x~y.~ e \neq C(x, y)) $$
+
+\bigskip
+
+Extension au \texttt{match} :
+$$
+  \begin{array}{rlcccccccc}
+    e^+      & (M) & = & \big(e = A \rightarrow e^+ (a) \big)      & \land & \big(\forall x.~ e = B(x) \rightarrow e^+ (b(x)) \big)      & \land & \big(\forall x~y.~ e = C(x, y) \rightarrow e^+ (c(x,y)) \big)       & \land & \big(p(e) \rightarrow e^+ (d) \big)      \\[10pt]
+    e^-      & (M) & = & \big(e = A \land e^- (a) \big)            & \lor  & \big(\exists x.~ e = B(x) \land e^- (b(x)) \big)            & \lor  & \big(\exists x~y.~ e = C(x, y) \land e^- (c(x,y)) \big)             & \lor  & \big(p(e) \land e^- (d) \big)            \\[10pt]
+    se^+     & (M) & = & \big(e = A \rightarrow se^+ (a) \big)     & \cup  & \big(\forall x.~ e = B(x) \rightarrow se^+ (b(x)) \big)     & \cup  & \big(\forall x~y.~ e = C(x, y) \rightarrow se^+ (c(x,y)) \big)      & \cup  & \big(p(e) \rightarrow se^+ (d) \big)     \\[10pt]
+    se^-     & (M) & = & \big(e = A \land se^- (a) \big)           & \cup  & \big(\exists x.~ e = B(x) \land se^- (b(x)) \big)           & \cup  & \big(\exists x~y.~ e = C(x, y) \land se^- (c(x,y)) \big)            & \cup  & \big(p(e) \land se^- (d) \big)           \\[10pt]
+    sc^{all} & (M) & = & \big(e = A \rightarrow sc^{all} (a) \big) & \cup  & \big(\forall x.~ e = B(x) \rightarrow sc^{all} (b(x)) \big) & \cup  & \big(\forall x~y.~ e = C(x, y) \rightarrow sc^{all} (c(x, y)) \big) & \cup  & \big(p(e) \rightarrow sc^{all} (d) \big) \\
+  \end{array}
+$$
+
+\end{document}

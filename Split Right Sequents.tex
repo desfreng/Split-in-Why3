@@ -1,0 +1,598 @@
+\documentclass[12pt]{article}
+
+\usepackage[top=1cm, left=1cm, right=1cm, bottom=2cm]{geometry}
+\usepackage{lmodern}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{pdflscape}
+\usepackage{multicol}
+\usepackage{todonotes}
+
+\newcommand{\dbar}{~||~}
+\newcommand{\damp}{~\&\&~}
+\newcommand{\so}{~\texttt{so}~}
+\newcommand{\by}{~\texttt{by}~}
+
+\newcommand{\olet}{\texttt{let}~}
+\newcommand{\oin}{~\texttt{in}~}
+
+\newcommand{\oif}{\texttt{if}~}
+\newcommand{\othen}{~\texttt{then}~}
+\newcommand{\oelse}{~\texttt{else}~}
+
+\newcommand{\omatch}{\texttt{match}~}
+\newcommand{\owith}{~\texttt{with}}
+\newcommand{\oend}{\texttt{end}}
+\newcommand{\ncst}{\mathtt{fcst}~c}
+\newcommand{\term}{\mathcal{T}}
+\newcommand{\var}{\mathcal{X}}
+\newcommand{\seq}{\mathcal{S}}
+\newcommand{\partOf}[1]{\mathcal{P}(#1)}
+
+
+\begin{document}
+\section*{Notations}
+\begin{gather*}
+  \var = \textrm{Ensemble de variable} \\
+  \seq = \partOf{\term \cup \var} \times \term  \\
+  \{\Gamma, x, P \vdash Q \} = \{\Gamma, x \vdash P \rightarrow Q \} =  \{\Gamma \vdash \forall x.~ P \rightarrow Q \} \\
+  \big\{\{\Gamma \vdash a \land b \}\big\} \simeq \{\Gamma \vdash a \} \cup \{\Gamma \vdash b \}
+\end{gather*}
+
+\section*{Opérateurs $s^+$, $s^-$ et $sc^{all}$}
+\begin{align*}
+   & s^+ : \left\{\begin{array}{ccc}
+                    \seq                & \to     & \partOf{\seq}                              \\
+                    \{\Gamma \vdash a\} & \mapsto & \{\Gamma \vdash e^+(a) \land c^{all} (a)\}
+                  \end{array}\right. &
+   & sc^{all}  : \left\{\begin{array}{ccc}
+                          \seq                & \to     & \partOf{\seq}                 \\
+                          \{\Gamma \vdash a\} & \mapsto & \{\Gamma \vdash c^{all} (a)\}
+                        \end{array}\right.
+\end{align*}
+\bigskip
+
+Comment calculer $s^+$ lors d'une négation ?
+\begin{align*}
+  s^+ (\{\Gamma \vdash \neg a\}) & = \{\Gamma \vdash e^+(\neg a) \land c^{all} (\neg a)\} \\
+                                 & = \{\Gamma \vdash \neg e^-(a) \land c^{all} (a)\}      \\
+                                 & = ~?
+\end{align*}
+
+On introduit alors $s^-$, qui correspond ``pousser'' la négation au sein de la formule :
+\[
+  s^- : \left\{
+  \begin{array}{ccc}
+    \seq                & \to     & \partOf{\seq}                 \\
+    \{\Gamma \vdash a\} & \mapsto & s^+(\{\Gamma \vdash \neg a\})
+  \end{array}
+  \right.
+\]
+
+\bigskip
+
+Remarque :
+\begin{align*}
+  sc^{all} (\{\Gamma \vdash a\}) & \subset s^+ (\{\Gamma \vdash a\}) & sc^{all} (\{\Gamma \vdash a\}) & \subset s^- (\{\Gamma \vdash a\})
+\end{align*}
+
+\newpage
+\thispagestyle{empty}
+\newgeometry{top=0.5cm, left=0.5cm, right=0.5cm, bottom=0.5cm}
+\begin{landscape}
+
+  \section*{Formules}
+  \[
+    \begin{array}{rlcl c rlcl}
+      s^+      & (\{\Gamma \vdash a\})                   & = & \{\Gamma \vdash a\}
+               & \quad                                   &
+      s^+      & (\{\Gamma \vdash \neg a\})              & = & s^- (\{\Gamma \vdash a\})                                                                      \\
+
+      s^-      & (\{\Gamma \vdash a\})                   & = & \{\Gamma \vdash \neg a\}
+               & \quad                                   &
+      s^-      & (\{\Gamma \vdash \neg a\})              & = & s^+ (\{\Gamma \vdash a\})                                                                      \\
+
+      sc^{all} & (\{\Gamma \vdash a\})                   & = & \emptyset
+               & \quad                                   &
+      sc^{all} & (\{\Gamma \vdash \neg a\})              & = & sc^{all} (\{\Gamma \vdash a\})                                                                 \\
+      \\[1.5em]
+      s^+      & (\{\Gamma \vdash a \land b\})           & = & s^+ (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma \vdash b\})
+               & \quad                                   &
+      s^+      & (\{\Gamma \vdash a \rightarrow b\})     & = & sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, e^- (a) \vdash b\})                         \\
+
+      s^-      & (\{\Gamma \vdash a \land b\})           & = & sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^- (a)\vdash b\})
+               & \quad                                   &
+      s^-      & (\{\Gamma \vdash a \rightarrow b\})     & = & s^+ (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma \vdash b\})                                       \\
+
+      sc^{all} & (\{\Gamma \vdash a \land b\})           & = & sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma \vdash b\})
+               & \quad                                   &
+      sc^{all} & (\{\Gamma \vdash a \rightarrow b\})     & = & sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, e^- (a) \vdash b\})                    \\
+      \\[1.5em]
+      s^+      & (\{\Gamma \vdash a \lor b\})            & = & sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, \neg e^+(a) \vdash b\})
+               & \quad                                   &
+      s^+      & (\{\Gamma \vdash a \leftrightarrow b\}) & = & sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, e^- (a) \vdash b\})                         \\
+               &                                         &   &
+               &                                         &
+               &                                         &   & {} \cup sc^{all} (\{\Gamma \vdash b\}) \cup s^+ (\{\Gamma, e^-(b) \vdash a\})                  \\[.8em]
+
+      s^-      & (\{\Gamma \vdash a \lor b\})            & = & s^- (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma \vdash b\})
+               & \quad                                   &
+      s^-      & (\{\Gamma \vdash a \leftrightarrow b\}) & = & sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^-(a) \vdash b\})                          \\
+               &                                         &   &
+               &                                         &
+               &                                         &   & {} \cup s^+ (\{\Gamma, \neg e^+ (a) \vdash b\})                                                \\[.8em]
+
+      sc^{all} & (\{\Gamma \vdash a \lor b\})            & = & sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, \neg e^+ (a)\vdash b\})
+               & \quad                                   &
+      sc^{all} & (\{\Gamma \vdash a \leftrightarrow b\}) & = & sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, e^- (a) \vdash b \})                   \\
+               &                                         &   &
+               &                                         &
+               &                                         &   & {} \cup sc^{all} (\{\Gamma \vdash b\}) \cup sc^{all} (\{\Gamma, e^- (b) \vdash a\})
+      \\[1.5em]
+      s^+      & (\{\Gamma \vdash \forall x.~ a\})       & = & s^+ (\{\Gamma, c \vdash a[x\leftarrow c]\})
+               & \quad                                   &
+      s^+      & (\{\Gamma \vdash \exists x.~ a\})       & = & \{\Gamma \vdash \exists x.~ e^+(a)\} \cup sc^{all}(\{\Gamma, c \vdash a[x\leftarrow c]\})      \\
+
+      s^-      & (\{\Gamma \vdash \forall x.~ a\})       & = & \{\Gamma \vdash \exists x.~ \neg e^+(a)\} \cup sc^{all} (\{\Gamma, c\vdash a[x\leftarrow c]\})
+               & \quad                                   &
+      s^-      & (\{\Gamma \vdash \exists x.~ a\})       & = & s^- (\{\Gamma, c \vdash a[x\leftarrow c]\})                                                    \\
+
+      sc^{all} & (\{\Gamma \vdash \forall x.~ a\})       & = & sc^{all} (\{\Gamma, c\vdash a[x\leftarrow c]\})
+               & \quad                                   &
+      sc^{all} & (\{\Gamma \vdash \exists x.~ a\})       & = & sc^{all} (\{\Gamma, c\vdash a[x\leftarrow c]\})                                                \\
+      \\[1.5em]
+      s^+      & (\{\Gamma \vdash a \damp b\})           & = & s^{+}(\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, e^-(a) \vdash b \})
+               & \quad                                   &
+      s^+      & (\{\Gamma \vdash a \dbar b\})           & = & sc^{all}(\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma,\neg e^+(a) \vdash b\})                       \\
+
+      s^-      & (\{\Gamma \vdash a \damp b\})           & = & sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^- (a)\vdash b\})
+               & \quad                                   &
+      s^-      & (\{\Gamma \vdash a \dbar b\})           & = & s^- (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, \neg e^+ (a) \vdash b\})                         \\
+
+      sc^{all} & (\{\Gamma \vdash a \damp b\})           & = & sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, e^- (a) \vdash b \})
+               & \quad                                   &
+      sc^{all} & (\{\Gamma \vdash a \dbar b\})           & = & sc^{all}(\{\Gamma \vdash a\}) \cup sc^{all}(\{\Gamma, \neg e^+ (a) \vdash b\})                 \\
+      \\[1.5em]
+      s^+      & (\{\Gamma \vdash a \by b\})             & = & s^+(\{\Gamma \vdash b \}) \cup sc^{all}(\{\Gamma \vdash a\})
+               & \quad                                   &
+      s^+      & (\{\Gamma \vdash a \so b\})             & = & s^+(\{\Gamma \vdash a\}) \cup s^+(\{\Gamma, e^-(a) \vdash b\})                                 \\
+               &                                         &   & {} \cup \{\Gamma, e^-(b) \vdash e^+(a)\}
+               &                                         &
+               &                                         &   &                                                                                                \\[.8em]
+
+      s^-      & (\{\Gamma \vdash a \by b\})             & = & s^-(\{\Gamma \vdash a\}) \cup sc^{all}(\{\Gamma \vdash b\})
+               & \quad                                   &
+      s^-      & (\{\Gamma \vdash a \so b\})             & = & sc^{all} (\{\Gamma \vdash a \}) \cup s^+(\{\Gamma, e^-(a) \vdash b\})                          \\
+               &                                         &   & {} \cup \{\Gamma, e^-(b) \vdash e^+(a)\}
+               &                                         &
+               &                                         &   & {} \cup \{\Gamma, e^-(a) \vdash \neg e^-(b) \}                                                 \\[.8em]
+
+      sc^{all} & (\{\Gamma \vdash a \by b\})             & = & sc^{all}(\{\Gamma \vdash b \}) \cup sc^{all}(\{\Gamma \vdash a\})
+               & \quad                                   &
+      sc^{all} & (\{\Gamma \vdash a \so b\})             & = & sc^{all} (\{\Gamma \vdash a\}) \cup s^+(\{\Gamma, e^-(a) \vdash b\})                           \\
+               &                                         &   & {} \cup \{\Gamma, e^-(b) \vdash e^+(a)\}
+               &                                         &
+               &                                         &   &
+    \end{array}
+  \]
+\end{landscape}
+\restoregeometry
+\subsection*{Let}
+Le connecteur \texttt{let} correspond à l'évaluation d'une formule avec une
+nouvelle variable définie dans le contexte. D'où :
+\[
+  \{\Gamma \vdash \olet c \coloneqq b \oin a\} \simeq \{\Gamma, c \coloneqq b \vdash a \}
+\]
+
+\bigskip
+
+Soit les formules :
+\[
+  \begin{array}{rlcl}
+    e^+      & (\olet c \coloneqq b \oin a)                   & = & \olet c \coloneqq b \oin e^+ (a)               \\
+    e^-      & (\olet c \coloneqq b \oin a)                   & = & \olet c \coloneqq b \oin e^- (a)               \\
+    s^+      & (\{\Gamma \vdash \olet c \coloneqq b \oin a\}) & = & s^+ (\{\Gamma, c \coloneqq b \vdash a \})      \\
+    s^-      & (\{\Gamma \vdash \olet c \coloneqq b \oin a\}) & = & s^- (\{\Gamma, c \coloneqq b \vdash a \})      \\
+    sc^{all} & (\{\Gamma \vdash \olet c \coloneqq b \oin a\}) & = & sc^{all} (\{\Gamma, c \coloneqq b \vdash a \}) \\
+  \end{array}
+\]
+
+\todo[inline]{
+  Mais si on ``compilait'' \texttt{let} en :
+  \begin{align*}
+    \{\Gamma \vdash \olet c \coloneqq b \oin a\}    & \simeq \{\Gamma \vdash \forall c.~  c = b \rightarrow a\} &
+    \{\Gamma, \olet c \coloneqq b \oin a \vdash X\} & \simeq \{\Gamma, \exists c.~  c = b \land a \vdash X\}
+  \end{align*}
+  Les définitions pour $s^+$, $s^-$ et $sc^{all}$ restent valables, mais pour $e^+$ et $e^-$ :
+  \[
+    \begin{array}{rlcl}
+      e^+ & (\olet c \coloneqq b \oin a) & = & \forall c.~ c = b \rightarrow e^+ (a) \\
+      e^- & (\olet c \coloneqq b \oin a) & = & \exists c.~ c = b \land e^- (a)
+    \end{array}
+  \]
+  Ce qui élimine la construction \texttt{let} de la logique utilisée en sortie.
+}
+
+\subsection*{If}
+Une ``compilation'' du \texttt{if} dans la logique :
+\[
+  \oif a \othen b \oelse c \equiv (a \rightarrow b) \land (\neg a \rightarrow c) \equiv (a \land b) \lor (\neg a \land c)
+\]
+
+\bigskip
+
+Extension au \texttt{if} :
+\[
+  \begin{array}{rlcl}
+    e^+      & (\oif a \othen b \oelse c)                   & = & (e^- (a) \rightarrow e^+ (b)) \land (\neg e^+ (a) \rightarrow e^+ (c))                                                        \\
+    e^-      & (\oif a \othen b \oelse c)                   & = & (e^- (a) \land e^- (b)) \lor (\neg e^+ (a) \land e^- (c))                                                                     \\
+    s^+      & (\{\Gamma \vdash \oif a \othen b \oelse c\}) & = & sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, e^- (a) \vdash b\}) \cup s^+ (\{\Gamma, \neg e^+ (a) \vdash c\})           \\
+    s^-      & (\{\Gamma \vdash \oif a \othen b \oelse c\}) & = & sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^- (a) \vdash b\}) \cup s^- (\{\Gamma, \neg e^+ (a) \vdash c\})           \\
+    sc^{all} & (\{\Gamma \vdash \oif a \othen b \oelse c\}) & = & sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, e^- (a) \vdash b\}) \cup sc^{all} (\{\Gamma, \neg e^+ (a) \vdash c\}) \\
+  \end{array}
+\]
+
+\newpage
+
+\subsection*{Match}
+Une ``compilation'' du \texttt{match} dans la logique :
+\[
+  \begin{array}{rcl}
+    M & \coloneqq &
+    \begin{array}{clcl}
+      \multicolumn{4}{l}{\omatch e \owith} \\
+      ~| & A    & \mapsto & a              \\
+      ~| & B(x) & \mapsto & b              \\
+      ~| & \_   & \mapsto & c              \\
+      \multicolumn{4}{l}{\oend}
+    \end{array}                                                                           \\
+      & \equiv    & (e = A \rightarrow a ) \land (\forall x.~ e = B(x) \rightarrow b ) \land (p(e) \rightarrow c ) \\[10pt]
+      & \equiv    & (e = A \land a ) \lor (\exists x.~ e = B(x) \land b ) \lor (p(e) \land c )                     \\
+  \end{array}
+\]
+Avec
+\[
+  p(e) \coloneqq e \neq A \land (\forall x.~ e \neq B(x))
+\]
+
+\bigskip
+
+Extension au \texttt{match} :
+\[
+  \begin{array}{rlcl}
+    e^+      & (M)                   & = & (e = A \rightarrow e^+(a) ) \land (\forall x.~ e = B(x) \rightarrow e^+(b) ) \land (p(e) \rightarrow e^+(c) ) \\[.8em]
+    e^-      & (M)                   & = & (e = A \land e^-(a) ) \lor (\exists x.~ e = B(x) \land e^-(b) ) \lor (p(e) \land e^-(c) )                     \\[.8em]
+    s^+      & (\{\Gamma \vdash M\}) & = & s^+ (\{\Gamma, e = A \vdash a\}) \cup s^+ (\{\Gamma, cst, e = B(cst) \vdash b[x\leftarrow cst]\})             \\
+             &                       &   & {} \cup s^+ (\{\Gamma, e \neq A, \forall x.~ e \neq B(x) \vdash c\})                                          \\[.8em]
+    s^-      & (\{\Gamma \vdash M\}) & = & s^- (\{\Gamma, e = A \vdash a\}) \cup s^- (\{\Gamma, cst, e = B(cst)\vdash b[x\leftarrow cst]\})              \\
+             &                       &   & {} \cup s^- (\{\Gamma, e \neq A, \forall x.~ e \neq B(x) \vdash c\})                                          \\[.8em]
+    sc^{all} & (\{\Gamma \vdash M\}) & = & s^{all} (\{\Gamma, e = A \vdash a\}) \cup sc^{all} (\{\Gamma, cst, e = B(cst) \vdash b[x\leftarrow cst]\})    \\
+             &                       &   & {} \cup s^{all} (\{\Gamma, e \neq A, \forall x.~ e \neq B(x) \vdash c \})
+  \end{array}
+\]
+
+
+
+\newpage
+
+\section*{Preuves}
+\subsection*{Atomes}
+\begin{align*}
+  s^+ (\{\Gamma \vdash a\})      & = \{\Gamma \vdash e^+(a) \land c^{all}(a)\} = \{\Gamma \vdash a \land \top \}= \{\Gamma \vdash a\}                                        \\
+  \\
+  s^- (\{\Gamma \vdash a\})      & = s^+ (\{\Gamma \vdash \neg a\}) = \{\Gamma \vdash e^+(\neg a) \land c^{all} (\neg a)\} = \{\Gamma \vdash \neg e^-(a) \land c^{all} (a)\} \\
+                                 & = \{\Gamma \vdash \neg a \land \top \} = \{\Gamma \vdash \neg a\}                                                                         \\
+  \\
+  sc^{all} (\{\Gamma \vdash a\}) & = \{\Gamma \vdash c^{all}(a)\}= \{\Gamma \vdash \top \}= \{\} \in \seq
+\end{align*}
+
+\subsection*{Négation}
+\begin{align*}
+  s^+ (\{\Gamma \vdash \neg a\})      & = s^- (\{\Gamma \vdash a\})                                                                        \\
+  \\
+  s^- (\{\Gamma \vdash \neg a\})      & = s^+ (\{\Gamma \vdash \neg \neg a\}) = s^+ (\{\Gamma \vdash a\})                                  \\
+  \\
+  sc^{all} (\{\Gamma \vdash \neg a\}) & = \{\Gamma \vdash c^{all}(\neg a)\} = \{\Gamma \vdash c^{all}(a)\}= sc^{all} (\{\Gamma \vdash a\}) \\
+\end{align*}
+
+\subsection*{Conjonction}
+\begin{align*}
+  s^+ (\{\Gamma \vdash a \land b\})      & = \{\Gamma \vdash e^+(a \land b) \land c^{all}(a \land b)\}                                \\
+                                         & = \{\Gamma \vdash e^+(a) \land e^+(b) \land c^{all}(a) \land c^{all}(b)\}                  \\
+                                         & = \{\Gamma \vdash (e^+(a) \land c^{all}(a)) \land (e^+(b) \land c^{all}(b))\}              \\
+                                         & = \{\Gamma \vdash e^+(a) \land c^{all}(a)\} \cup \{\Gamma \vdash e^+(b) \land c^{all}(b)\} \\
+                                         & = s^+ (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma \vdash b\})                                 \\
+  \\
+  sc^{all} (\{\Gamma \vdash a \land b\}) & = \{\Gamma \vdash c^{all}(a \land b)\}                                                     \\
+                                         & = \{\Gamma \vdash c^{all}(a) \land c^{all}(b)\}                                            \\
+                                         & = sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma \vdash b\})                       \\
+  \\
+  s^- (\{\Gamma \vdash a \land b\})      & = s^+ (\{\Gamma\vdash\neg (a \land b)\})                                                   \\
+                                         & = s^+ (\{\Gamma\vdash\neg a \lor \neg b\})                                                 \\
+                                         & = s^+ (\{\Gamma\vdash a \rightarrow \neg b\})                                              \\
+                                         & = sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, e^- (a)\vdash \neg b\})               \\
+                                         & = sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^- (a)\vdash b\})                    \\
+\end{align*}
+
+\subsection*{Implication}
+\begin{align*}
+  s^+ (\{\Gamma \vdash a \rightarrow b\})      & = \{\Gamma \vdash e^+(a \rightarrow b) \land c^{all} (a \rightarrow b)\}                                 \\
+                                               & = \{\Gamma \vdash (e^-(a) \rightarrow e^+(b)) \land c^{all} (a) \land (e^-(a) \rightarrow c^{all} (b))\} \\
+                                               & = \{\Gamma \vdash c^{all} (a) \land (e^-(a) \rightarrow e^+(b) \land c^{all} (b))\}                      \\
+                                               & = \{\Gamma \vdash c^{all} (a)\} \cup \{\Gamma \vdash e^-(a) \rightarrow e^+(b) \land c^{all} (b)\}       \\
+                                               & = \{\Gamma \vdash c^{all} (a)\} \cup \{\Gamma, e^-(a) \vdash e^+(b) \land c^{all} (b)\}                  \\
+                                               & = sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, e^- (a) \vdash b\})                                 \\
+  \\
+  sc^{all} (\{\Gamma \vdash a \rightarrow b\}) & = \{\Gamma \vdash c^{all}(a \rightarrow b)\}                                                             \\
+                                               & = \{\Gamma \vdash c^{all}(a) \land (e^-(a) \rightarrow c^{all}(b))\}                                     \\
+                                               & = \{\Gamma \vdash c^{all}(a)\} \cup \{\Gamma \vdash e^-(a) \rightarrow c^{all}(b)\}                      \\
+                                               & = \{\Gamma \vdash c^{all}(a)\} \cup \{\Gamma, e^-(a) \vdash c^{all}(b)\}                                 \\
+                                               & = sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, e^- (a) \vdash b\})                            \\
+  \\
+  s^- (\{\Gamma \vdash a \rightarrow b\})      & = s^+ (\{\Gamma \vdash \neg (a \rightarrow b)\})                                                         \\
+                                               & = s^+ (\{\Gamma \vdash a \land \neg b\})                                                                 \\
+                                               & = s^+ (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma \vdash \neg b\})                                          \\
+                                               & = s^+ (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma \vdash b\})                                               \\
+\end{align*}
+
+\subsection*{Disjonction}
+\begin{align*}
+  s^+ (\{\Gamma \vdash a \lor b\})      & = s^+ (\{\Gamma \vdash \neg \neg a \lor b\})                                            \\
+                                        & = s^+ (\{\Gamma \vdash \neg a \rightarrow b\})                                          \\
+                                        & = sc^{all} (\{\Gamma \vdash \neg a\}) \cup s^+ (\{\Gamma, e^-(\neg a) \vdash b\})       \\
+                                        & = sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, \neg e^+(a) \vdash b\})            \\
+  \\
+  s^- (\{\Gamma \vdash a \lor b\})      & = s^+ (\{\Gamma \vdash \neg (a \lor b)\})                                               \\
+                                        & = s^+ (\{\Gamma \vdash \neg a \land \neg b\})                                           \\
+                                        & = s^+ (\{\Gamma \vdash \neg a\}) \cup s^+ (\{\Gamma \vdash \neg b\})                    \\
+                                        & = s^- (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma \vdash b\})                              \\
+  \\
+  sc^{all} (\{\Gamma \vdash a \lor b\}) & = sc^{all} (\{\Gamma \vdash \neg \neg a \lor b \})                                      \\
+                                        & = sc^{all} (\{\Gamma \vdash \neg a \rightarrow b \})                                    \\
+                                        & = sc^{all} (\{\Gamma \vdash \neg a \}) \cup sc^{all} (\{\Gamma, e^- (\neg a)\vdash b\}) \\
+                                        & = sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, \neg e^+ (a)\vdash b\})       \\
+\end{align*}
+
+\subsection*{Équivalence}
+\begin{align*}
+  s^+ (\{\Gamma \vdash a \leftrightarrow b\})      & = s^+ (\{\Gamma \vdash (a \rightarrow b) \land (b \rightarrow a)\})                                                                                                \\
+                                                   & = s^+ (\{\Gamma \vdash a \rightarrow b\}) \cup s^+ (\{\Gamma \vdash b \rightarrow a\})                                                                             \\
+                                                   & = sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma \vdash b\}) \cup s^+ (\{\Gamma, e^- (a) \vdash b\}) \cup s^+ (\{\Gamma, e^-(b) \vdash a\})                \\
+  \\
+  s^- (\{\Gamma \vdash a \leftrightarrow b\})      & = s^- (\{\Gamma \vdash (a \land b) \lor (\neg a \land \neg b)\})                                                                                                   \\
+                                                   & = s^- (\{\Gamma \vdash a \land b\}) \cup s^- (\{\Gamma \vdash \neg a \land \neg b\})                                                                               \\
+                                                   & = sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^-(a) \vdash b\}) \cup sc^{all} (\{\Gamma \vdash \neg a\}) \cup s^- (\{\Gamma, e^- (\neg a) \vdash \neg b\}) \\
+                                                   & = sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^-(a) \vdash b\}) \cup s^+ (\{\Gamma, \neg e^+ (a) \vdash b\})                                               \\
+  \\
+  sc^{all} (\{\Gamma \vdash a \leftrightarrow b\}) & = sc^{all} (\{\Gamma \vdash (a \rightarrow b) \land (b \rightarrow a)\})                                                                                           \\
+                                                   & = sc^{all} (\{\Gamma \vdash a \rightarrow b\}) \cup sc^{all} (\{\Gamma \vdash b \rightarrow a\})                                                                   \\
+                                                   & = sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, e^- (a) \vdash b \}) \cup sc^{all} (\{\Gamma \vdash b\}) \cup sc^{all} (\{\Gamma, e^- (b) \vdash a\})    \\
+\end{align*}
+
+\subsection*{Quantificateur Universel}
+\begin{align*}
+  s^+ (\{\Gamma \vdash \forall x.~ a\})      & = \{\Gamma \vdash e^+(\forall x.~ a) \land c^{all} (\forall x.~ a)\}                             \\
+                                             & = \{\Gamma \vdash (\forall x.~ e^+(a)) \land (\forall x.~ c^{all} (a))\}                         \\
+                                             & = \{\Gamma \vdash \forall x.~ e^+(a) \land c^{all} (a)\}                                         \\
+                                             & = \{\Gamma, c \vdash e^+(a[x\leftarrow c]) \land c^{all} (a[x\leftarrow c])\}                    \\
+                                             & = s^+ (\{\Gamma, c \vdash a[x\leftarrow c]\})                                                    \\
+  \\
+  s^- (\{\Gamma \vdash \forall x.~ a\})      & = s^+ (\{\Gamma \vdash \neg (\forall x.~ a)\})                                                   \\
+                                             & = s^+ (\{\Gamma \vdash \exists x.~ \neg a\})                                                     \\
+                                             & = \{\Gamma \vdash e^+(\exists x.~ \neg a) \land c^{all} (\exists x.~ \neg a)\}                   \\
+                                             & = \{\Gamma \vdash \exists x.~ e^+(\neg a)\} \cup \{\Gamma \vdash \forall x.~ c^{all}(\neg a)\}   \\
+                                             & = \{\Gamma \vdash \exists x.~ \neg e^+(a)\} \cup \{\Gamma \vdash \forall x.~ c^{all} (a)\}       \\
+                                             & = \{\Gamma \vdash \exists x.~ \neg e^+(a)\} \cup \{\Gamma, c\vdash c^{all} (a[x\leftarrow c])\}  \\
+                                             & = \{\Gamma \vdash \exists x.~ \neg e^+(a)\} \cup sc^{all} (\{\Gamma, c\vdash a[x\leftarrow c]\}) \\
+  \\
+  sc^{all} (\{\Gamma \vdash \forall x.~ a\}) & = \{\Gamma \vdash c^{all}(\forall x.~ a)\}                                                       \\
+                                             & = \{\Gamma \vdash \forall x.~ c^{all}(a)\}                                                       \\
+                                             & = \{\Gamma, c\vdash c^{all}(a[x\leftarrow c])\}                                                  \\
+                                             & = sc^{all} (\{\Gamma, c\vdash a[x\leftarrow c]\})
+\end{align*}
+
+\subsection*{Quantificateur Existentiel}
+\begin{align*}
+  s^+ (\{\Gamma \vdash \exists x.~ a\})      & = \{\Gamma \vdash e^+(\exists x.~ a) \land c^{all} (\exists x.~ a)\}                        \\
+                                             & = \{\Gamma \vdash (\exists x.~ e^+(a)) \land (\forall x.~ c^{all} (a) )\}                   \\
+                                             & = \{\Gamma \vdash \exists x.~ e^+(a)\} \cup \{\Gamma \vdash \forall x.~ c^{all} (a)\}       \\
+                                             & = \{\Gamma \vdash \exists x.~ e^+(a)\} \cup \{\Gamma, c \vdash c^{all} (a[x\leftarrow c])\} \\
+                                             & = \{\Gamma \vdash \exists x.~ e^+(a)\} \cup sc^{all}(\{\Gamma, c \vdash a[x\leftarrow c]\}) \\
+  \\
+  s^- (\{\Gamma \vdash \exists x.~ a\})      & = s^+ (\{\Gamma \vdash \neg(\exists x.~ a)\})                                               \\
+                                             & = s^+ (\{\Gamma \vdash \forall x.~ \neg a\})                                                \\
+                                             & = s^+ (\{\Gamma, c \vdash \neg a[x\leftarrow c]\})                                          \\
+                                             & = s^- (\{\Gamma, c \vdash a[x\leftarrow c]\})                                               \\
+  \\
+  sc^{all} (\{\Gamma \vdash \exists x.~ a\}) & = \{\Gamma \vdash c^{all}(\exists x.~ a)\}                                                  \\
+                                             & = \{\Gamma \vdash \forall x.~ c^{all}(a)\}                                                  \\
+                                             & = \{\Gamma, c\vdash c^{all}(a[x\leftarrow c])\}                                             \\
+                                             & = sc^{all} (\{\Gamma, c\vdash a[x\leftarrow c]\})
+\end{align*}
+
+\subsection*{Conjonction Asymétrique}
+\begin{align*}
+  s^+ (\{\Gamma \vdash a \damp b\})      & = \{\Gamma \vdash e^+(a \damp b) \land c^{all} (a \damp b)\}                                                         \\
+                                         & = \{\Gamma \vdash e^+(a) \land (e^-(a) \rightarrow e^+(b)) \land c^{all} (a) \land (e^-(a) \rightarrow c^{all}(b))\} \\
+                                         & = \{\Gamma \vdash e^+(a) \land c^{all} (a) \land (e^-(a) \rightarrow e^+(b) \land c^{all}(b))\}                      \\
+                                         & = \{\Gamma \vdash e^+(a) \land c^{all} (a)\} \cup \{\Gamma \vdash e^-(a) \rightarrow e^+(b) \land c^{all}(b)\}       \\
+                                         & = s^{+}(\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, e^-(a) \vdash b \})                                                 \\
+  \\
+  s^- (\{\Gamma \vdash a \damp b\})      & = s^- (\{\Gamma \vdash a \land b\})                                                                                  \\
+                                         & = sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^- (a)\vdash b\})                                              \\
+  \\
+  sc^{all} (\{\Gamma \vdash a \damp b\}) & = \{\Gamma \vdash c^{all} (a \damp b)\}                                                                              \\
+                                         & = \{\Gamma \vdash c^{all} (a) \land (e^- (a) \rightarrow c^{all}(b))\}                                               \\
+                                         & = \{\Gamma \vdash c^{all} (a)\} \cup \{\Gamma \vdash e^- (a) \rightarrow c^{all}(b)\}                                \\
+                                         & = sc^{all} (\{\Gamma \vdash a\}) \cup \{\Gamma, e^- (a) \vdash c^{all}(b)\}                                          \\
+                                         & = sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, e^- (a) \vdash b \})
+\end{align*}
+
+\subsection*{Disjonction Asymétrique}
+\begin{align*}
+  s^+ (\{\Gamma \vdash a \dbar b\})      & = \{\Gamma \vdash e^+(a \dbar b) \land c^{all} (a \dbar b)\}                                                                   \\
+                                         & = \{\Gamma \vdash (e^+(a) \lor e^+(b)) \land c^{all} (a) \land (e^+ (a) \lor c^{all} (b))\}                                    \\
+                                         & = \{\Gamma \vdash c^{all} (a)\} \cup \{\Gamma \vdash (e^+(a) \lor e^+(b)) \land (e^+ (a) \lor c^{all} (b))\}                   \\
+                                         & = sc^{all}(\{\Gamma \vdash a\}) \cup \{\Gamma \vdash e^+(a) \lor e^+(b) \land c^{all} (b)\}                                    \\
+                                         & = sc^{all}(\{\Gamma \vdash a\}) \cup \{\Gamma \vdash \neg e^+(a) \rightarrow e^+(b) \land c^{all} (b)\}                        \\
+                                         & = sc^{all}(\{\Gamma \vdash a\}) \cup \{\Gamma,\neg e^+(a) \vdash e^+(b) \land c^{all} (b)\}                                    \\
+                                         & = sc^{all}(\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma,\neg e^+(a) \vdash b\}) \qquad\qquad (= s^+ (\{\Gamma \vdash a \lor b\})~!) \\
+  \\
+  s^- (\{\Gamma \vdash a \dbar b\})      & = s^+ (\{\Gamma \vdash \neg (a \lor (\neg a \land b))\})                                                                       \\
+                                         & = s^+ (\{\Gamma \vdash \neg a \land \neg (\neg a \land b)\})                                                                   \\
+                                         & = s^+ (\{\Gamma \vdash \neg a\}) \cup s^+ (\{\Gamma \vdash \neg (\neg a \land b)\})                                            \\
+                                         & = s^- (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma \vdash a \lor \neg b\})                                                         \\
+                                         & = s^- (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, \neg e^+ (a) \vdash \neg b\})              \\
+                                         & = s^- (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, \neg e^+ (a) \vdash b\})                                                       \\
+  \\
+  sc^{all} (\{\Gamma \vdash a \dbar b\}) & = \{\Gamma \vdash c^{all} (a \dbar b)\}                                                                                        \\
+                                         & = \{\Gamma \vdash c^{all} (a) \land (e^+ (a) \lor c^{all} (b))\}                                                               \\
+                                         & = \{\Gamma \vdash c^{all} (a)\} \cup \{\Gamma \vdash e^+ (a) \lor c^{all} (b)\}                                                \\
+                                         & = sc^{all}(\{\Gamma \vdash a\}) \cup \{\Gamma \vdash \neg e^+ (a) \rightarrow c^{all} (b)\}                                    \\
+                                         & = sc^{all}(\{\Gamma \vdash a\}) \cup \{\Gamma, \neg e^+ (a) \vdash c^{all} (b)\}                                               \\
+                                         & = sc^{all}(\{\Gamma \vdash a\}) \cup sc^{all}(\{\Gamma, \neg e^+ (a) \vdash b\})                                               \\
+\end{align*}
+
+\subsection*{By}
+\begin{align*}
+  s^+ (\{\Gamma \vdash a \by b\})      & = \{\Gamma \vdash e^+(a \by b) \land c^{all}(a \by b)\}                                                                         \\
+                                       & = \{\Gamma \vdash e^+(b) \land c^{all}(a) \land c^{all} (b) \land (e^-(b) \rightarrow e^+(a))\}                                 \\
+                                       & = \{\Gamma \vdash e^+(b) \land c^{all}(b)\} \cup \{\Gamma \vdash c^{all} (a)\} \cup \{\Gamma \vdash e^-(b) \rightarrow e^+(a)\} \\
+                                       & = s^+(\{\Gamma \vdash b \}) \cup sc^{all}(\{\Gamma \vdash a\}) \cup \{\Gamma, e^-(b) \vdash e^+(a)\}                            \\
+  \\
+  s^- (\{\Gamma \vdash a \by b\})      & = s^+ (\{\Gamma \vdash \neg (a \by b)\})                                                                                        \\
+                                       & = \{\Gamma \vdash e^+(\neg (a \by b)) \land c^{all}(\neg (a \by b))\}                                                           \\
+                                       & = \{\Gamma \vdash \neg e^-(a \by b) \land c^{all}(a \by b)\}                                                                    \\
+                                       & = \{\Gamma \vdash \neg e^-(a) \land c^{all}(a) \land c^{all} (b) \land (e^-(b) \rightarrow e^+(a))\}                            \\
+                                       & = \{\Gamma \vdash e^+(\neg a) \land c^{all}(\neg a)\} \cup sc^{all}(\{\Gamma \vdash b\}) \cup \{\Gamma, e^-(b) \vdash e^+(a)\}  \\
+                                       & = s^+(\{\Gamma \vdash \neg a\}) \cup sc^{all}(\{\Gamma \vdash b\}) \cup \{\Gamma, e^-(b) \vdash e^+(a)\}                        \\
+                                       & = s^-(\{\Gamma \vdash a\}) \cup sc^{all}(\{\Gamma \vdash b\}) \cup \{\Gamma, e^-(b) \vdash e^+(a)\}                             \\
+  \\
+  sc^{all} (\{\Gamma \vdash a \by b\}) & = \{\Gamma \vdash c^{all}(a \by b)\}                                                                                            \\
+                                       & = \{\Gamma \vdash c^{all}(a) \land c^{all} (b) \land (e^-(b) \rightarrow e^+(a))\}                                              \\
+                                       & = \{\Gamma \vdash c^{all}(a) \} \cup \{\Gamma \vdash c^{all} (b) \} \cup \{\Gamma \vdash e^-(b) \rightarrow e^+(a)\}            \\
+                                       & = sc^{all}(\{\Gamma \vdash b \}) \cup sc^{all}(\{\Gamma \vdash a\}) \cup \{\Gamma, e^-(b) \vdash e^+(a)\}                       \\
+\end{align*}
+
+\subsection*{So}
+\begin{align*}
+  s^+ (\{\Gamma \vdash a \so b\})      & = \{\Gamma \vdash e^+(a \so b) \land c^{all}(a \so b)\}                                                                               \\
+                                       & = \{\Gamma \vdash e^+(a) \land c^{all}(a) \land (e^-(a) \rightarrow e^+(b) \land c^{all} (b))\}                                       \\
+                                       & = \{\Gamma \vdash e^+(a) \land c^{all}(a)\} \cup \{\Gamma \vdash e^-(a) \rightarrow e^+(b) \land c^{all} (b)\}                        \\
+                                       & = s^+(\{\Gamma \vdash a\}) \cup \{\Gamma, e^-(a) \vdash e^+(b) \land c^{all} (b)\}                                                    \\
+                                       & = s^+(\{\Gamma \vdash a\}) \cup s^+(\{\Gamma, e^-(a) \vdash b\})                                                                      \\
+  \\
+  s^- (\{\Gamma \vdash a \so b\})      & = s^+ (\{\Gamma \vdash \neg (a \so b)\})                                                                                              \\
+                                       & = \{\Gamma \vdash e^+(\neg (a \so b)) \land c^{all} (\neg (a \so b))\}                                                                \\
+                                       & = \{\Gamma \vdash \neg e^-(a \so b) \land c^{all} (a \so b)\}                                                                         \\
+                                       & = \{\Gamma \vdash \neg (e^-(a) \land e^-(b)) \land c^{all}(a) \land (e^-(a) \rightarrow e^+(b) \land c^{all} (b))\}                   \\
+                                       & = \{\Gamma \vdash (\neg e^-(a) \lor \neg e^-(b)) \land c^{all}(a) \land (e^-(a) \rightarrow e^+(b) \land c^{all} (b))\}               \\
+                                       & = \{\Gamma \vdash (e^-(a) \rightarrow \neg e^-(b)) \land c^{all}(a) \land (e^-(a) \rightarrow e^+(b) \land c^{all} (b))\}             \\
+                                       & = \{\Gamma \vdash c^{all}(a) \} \cup \{\Gamma \vdash e^-(a) \rightarrow \neg e^-(b) \land e^+(b) \land c^{all} (b)\}                  \\
+                                       & = sc^{all} (\{\Gamma \vdash a \}) \cup \{\Gamma, e^-(a) \vdash \neg e^-(b) \} \cup \{\Gamma, e^-(a) \vdash e^+(b) \land c^{all} (b)\} \\
+                                       & = sc^{all} (\{\Gamma \vdash a \}) \cup \{\Gamma, e^-(a) \vdash \neg e^-(b) \} \cup s^+(\{\Gamma, e^-(a) \vdash b\})                   \\
+  \\
+  sc^{all} (\{\Gamma \vdash a \so b\}) & = \{\Gamma \vdash c^{all}(a \so b)\}                                                                                                  \\
+                                       & = \{\Gamma \vdash c^{all}(a) \land (e^-(a) \rightarrow e^+(b) \land c^{all} (b))\}                                                    \\
+                                       & = \{\Gamma \vdash c^{all}(a)\} \cup \{\Gamma \vdash e^-(a) \rightarrow e^+(b) \land c^{all} (b)\}                                     \\
+                                       & = sc^{all} (\{\Gamma \vdash a\}) \cup \{\Gamma, e^-(a) \vdash e^+(b) \land c^{all} (b)\}                                              \\
+                                       & = sc^{all} (\{\Gamma \vdash a\}) \cup s^+(\{\Gamma, e^-(a) \vdash b\})                                                                \\
+\end{align*}
+\newpage
+
+\subsection*{If}
+Rappel :
+\[
+  \oif a \othen b \oelse c \equiv (a \rightarrow b) \land (\neg a \rightarrow c) \equiv (a \land b) \lor (\neg a \land c)
+\]
+
+\begin{align*}
+  s^+ (\{\Gamma \vdash \oif a \othen b \oelse c\})
+   & = s^+ (\{\Gamma \vdash (a \rightarrow b) \land (\neg a \rightarrow c)\})                                                        \\
+   & = s^+ (\{\Gamma \vdash a \rightarrow b\}) \cup s^+ (\{\Gamma \vdash \neg a \rightarrow c\})                                     \\
+   & = sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, e^- (a) \vdash b\})                                                        \\
+   & \phantom{ = {}}{} \cup sc^{all} (\{\Gamma \vdash \neg a\}) \cup s^+ (\{\Gamma, e^- (\neg a) \vdash c\})                         \\
+   & = sc^{all} (\{\Gamma \vdash a\}) \cup s^+ (\{\Gamma, e^- (a) \vdash b\}) \cup s^+ (\{\Gamma, \neg e^+ (a) \vdash c\})           \\
+  \\
+  s^- (\{\Gamma \vdash \oif a \othen b \oelse c\})
+   & = s^- (\{\Gamma \vdash (a \land b) \lor (\neg a \land c)\})                                                                     \\
+   & = s^- (\{\Gamma \vdash a \land b\}) \cup s^- (\{\Gamma \vdash \neg a \land c\})                                                 \\
+   & = sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^- (a)\vdash b\})                                                         \\
+   & \phantom{ = {}}{} \cup sc^{all} (\{\Gamma \vdash \neg a\}) \cup s^- (\{\Gamma, e^- (\neg a)\vdash c\})                          \\
+   & = sc^{all} (\{\Gamma \vdash a\}) \cup s^- (\{\Gamma, e^- (a)\vdash b\}) \cup s^- (\{\Gamma, \neg e^+ (a)\vdash c\})             \\
+  \\
+  sc^{all} (\{\Gamma \vdash \oif a \othen b \oelse c\})
+   & = sc^{all} (\{\Gamma \vdash (a \rightarrow b) \land (\neg a \rightarrow c)\})                                                   \\
+   & = sc^{all} (\{\Gamma \vdash a \rightarrow b\}) \cup sc^{all} (\{\Gamma \vdash \neg a \rightarrow c\})                           \\
+   & = sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, e^- (a) \vdash b\})                                                   \\
+   & \phantom{ = {}}{} \cup sc^{all} (\{\Gamma \vdash \neg a \}) \cup sc^{all} (\{\Gamma, e^- (\neg a ) \vdash c\})                  \\
+   & = sc^{all} (\{\Gamma \vdash a\}) \cup sc^{all} (\{\Gamma, e^- (a) \vdash b\}) \cup sc^{all} (\{\Gamma, \neg e^+ (a) \vdash c\}) \\
+\end{align*}
+
+\subsection*{Match}
+On pose :
+\[
+  \begin{array}{rcl}
+    M & \coloneqq &
+    \begin{array}{clcl}
+      \multicolumn{4}{l}{\omatch e \owith} \\
+      ~| & A    & \mapsto & a              \\
+      ~| & B(x) & \mapsto & b              \\
+      ~| & \_   & \mapsto & c              \\
+      \multicolumn{4}{l}{\oend}
+    \end{array}                                                                           \\
+      & \equiv    & (e = A \rightarrow a ) \land (\forall x.~ e = B(x) \rightarrow b ) \land (p(e) \rightarrow c ) \\[10pt]
+      & \equiv    & (e = A \land a ) \lor (\exists x.~ e = B(x) \land b ) \lor (p(e) \land c )                     \\
+  \end{array}
+\]
+Avec
+\[
+  p(e) \coloneqq e \neq A \land (\forall x.~ e \neq B(x))
+\]
+
+\bigskip
+
+
+De plus, puisque $\{\Gamma, a \land b \vdash X \} = \{\Gamma, a, b \vdash X \}
+$, on a lorsque $p(e)$ est une hypothèse :
+\[
+  \{\Gamma, p(e) \vdash X \} = \{\Gamma, e \neq A, \forall x.~ e \neq B(x) \vdash X \}
+\]
+
+
+\begin{align*}
+  s^+     & (\{\Gamma \vdash M\})                                                                                                                                                                              \\
+          & = s^+ (\{\Gamma \vdash (e = A \rightarrow a ) \land (\forall x.~ e = B(x) \rightarrow b ) \land (p(e) \rightarrow c )\})                                                                           \\
+          & = s^+ (\{\Gamma \vdash e = A \rightarrow a\}) \cup s^+ (\{\Gamma \vdash \forall x.~ e = B(x) \rightarrow b \}) \cup s^+ (\{\Gamma \vdash p(e) \rightarrow c \})                                    \\
+          & = sc^{all} (\{\Gamma \vdash e = A\}) \cup s^+ (\{\Gamma, e^- (e = A) \vdash a\}) \cup s^+ (\{\Gamma \vdash \forall x.~ e = B(x) \rightarrow b \}) \cup s^+ (\{\Gamma \vdash p(e) \rightarrow c \}) \\
+          & = \emptyset \cup s^+ (\{\Gamma, e = A \vdash a\}) \cup s^+ (\{\Gamma, cst \vdash (e = B(x) \rightarrow b)[x\leftarrow cst]\}) \cup s^+ (\{\Gamma \vdash p(e) \rightarrow c \})                     \\
+          & = s^+ (\{\Gamma, e = A \vdash a\}) \cup s^+ (\{\Gamma, cst \vdash e = B(cst) \rightarrow b[x\leftarrow cst]\}) \cup s^+ (\{\Gamma \vdash p(e) \rightarrow c \})                                    \\
+          & = s^+ (\{\Gamma, e = A \vdash a\}) \cup sc^{all} (\{\Gamma, cst \vdash e = B(cst)\}) \cup s^+ (\{\Gamma, cst, e^- (e = B(cst)) \vdash b[x\leftarrow cst]\})                                        \\
+          & \phantom{= {}} {} \cup s^+ (\{\Gamma \vdash p(e) \rightarrow c \})                                                                                                                                 \\
+          & = s^+ (\{\Gamma, e = A \vdash a\}) \cup \emptyset \cup s^+ (\{\Gamma, cst, e = B(cst) \vdash b[x\leftarrow cst]\}) \cup sc^{all} (\{\Gamma \vdash p(e)\})                                          \\
+          & \phantom{= {}} {} \cup s^+ (\{\Gamma, e^- (p(e)) \vdash c\})                                                                                                                                       \\
+          & = s^+ (\{\Gamma, e = A \vdash a\}) \cup s^+ (\{\Gamma, cst, e = B(cst) \vdash b[x\leftarrow cst]\}) \cup \emptyset \cup s^+ (\{\Gamma, p(e) \vdash c\})                                            \\
+          & = s^+ (\{\Gamma, e = A \vdash a\}) \cup s^+ (\{\Gamma, cst, e = B(cst) \vdash b[x\leftarrow cst]\}) \cup s^+ (\{\Gamma, p(e) \vdash c\})                                                           \\
+          & = s^+ (\{\Gamma, e = A \vdash a\}) \cup s^+ (\{\Gamma, cst, e = B(cst) \vdash b[x\leftarrow cst]\}) \cup s^+ (\{\Gamma, e \neq A, \forall x.~ e \neq B(x) \vdash c\})                              \\
+  \\
+  s^-     & (\{\Gamma \vdash M\})                                                                                                                                                                              \\
+          & = s^- (\{\Gamma \vdash (e = A \land a ) \lor (\exists x.~ e = B(x) \land b ) \lor (p(e) \land c )\})                                                                                               \\
+          & = s^- (\{\Gamma \vdash e = A \land a\}) \cup s^- (\{\Gamma \vdash \exists x.~ e = B(x) \land b\}) \cup s^- (\{\Gamma \vdash p(e) \land c\})                                                        \\
+          & =  s^- (\{\Gamma, e^- (e = A)\vdash a\}) \cup s^- (\{\Gamma, cst \vdash (e = B(x) \land b)[x\leftarrow cst]\}) \cup s^- (\{\Gamma, e^- (p(e)) \vdash c\})                                          \\
+          & =  s^- (\{\Gamma, e = A \vdash a\}) \cup s^- (\{\Gamma, cst \vdash e = B(cst) \land b[x\leftarrow cst]\}) \cup s^- (\{\Gamma, p(e) \vdash c\})                                                     \\
+          & =  s^- (\{\Gamma, e = A \vdash a\}) \cup s^- (\{\Gamma, cst, e^- (e = B(cst))\vdash b[x\leftarrow cst]\}) \cup s^- (\{\Gamma, p(e) \vdash c\})                                                     \\
+          & =  s^- (\{\Gamma, e = A \vdash a\}) \cup s^- (\{\Gamma, cst, e = B(cst)\vdash b[x\leftarrow cst]\}) \cup s^- (\{\Gamma, p(e) \vdash c\})                                                           \\
+          & =  s^- (\{\Gamma, e = A \vdash a\}) \cup s^- (\{\Gamma, cst, e = B(cst)\vdash b[x\leftarrow cst]\}) \cup s^- (\{\Gamma, e \neq A, \forall x.~ e \neq B(x) \vdash c\})                              \\
+  \\
+  s^{all} & (\{\Gamma \vdash M\})                                                                                                                                                                              \\
+          & = s^{all} (\{\Gamma \vdash (e = A \rightarrow a ) \land (\forall x.~ e = B(x) \rightarrow b ) \land (p(e) \rightarrow c )\})                                                                       \\
+          & = s^{all} (\{\Gamma \vdash e = A \rightarrow a\}) \cup s^{all} (\{\Gamma \vdash \forall x.~ e = B(x) \rightarrow b \}) \cup s^{all} (\{\Gamma \vdash p(e) \rightarrow c \})                        \\
+          & = s^{all} (\{\Gamma, e^- (e = A) \vdash a\}) \cup sc^{all} (\{\Gamma, cst\vdash (e = B(x) \rightarrow b)[x\leftarrow cst]\}) \cup s^{all} (\{\Gamma, e^-(p(e)) \vdash c \})                        \\
+          & = s^{all} (\{\Gamma, e = A \vdash a\}) \cup sc^{all} (\{\Gamma, cst\vdash e = B(cst) \rightarrow b[x\leftarrow cst]\}) \cup s^{all} (\{\Gamma, p(e) \vdash c \})                                   \\
+          & = s^{all} (\{\Gamma, e = A \vdash a\}) \cup sc^{all} (\{\Gamma, cst, e^-(e = B(cst)) \vdash b[x\leftarrow cst]\}) \cup s^{all} (\{\Gamma, p(e) \vdash c \})                                        \\
+          & = s^{all} (\{\Gamma, e = A \vdash a\}) \cup sc^{all} (\{\Gamma, cst, e = B(cst) \vdash b[x\leftarrow cst]\}) \cup s^{all} (\{\Gamma, p(e) \vdash c \})                                             \\
+          & = s^{all} (\{\Gamma, e = A \vdash a\}) \cup sc^{all} (\{\Gamma, cst, e = B(cst) \vdash b[x\leftarrow cst]\}) \cup s^{all} (\{\Gamma, e \neq A, \forall x.~ e \neq B(x) \vdash c \})                \\
+\end{align*}
+
+\end{document}
