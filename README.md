@@ -6,4 +6,6 @@ The ``Split Right`` files concern the definition of a transformation that introd
 
 The ``Split Right Sequents`` files concern the definition of a transformation that introduces elements into the context. This transformation operates directly on the proofs. A possible, but inefficient, implementation is given in the ``split.ml`` file.
 
+The ``Martin Clochard Article`` file contains Martin Clochard's article: *Preuves taillées en biseau*. It is available at the following address: https://inria.hal.science/hal-01404935/.
+
 This project was carried out as part of an internship in the Toccata team at Inria, supervised by Jean-Christophe Filliatre and Andrei Paskievich. The other part of the internship is available on the following GitHub repository: [ROBDD-in-Why3](https://github.com/desfreng/ROBDD-in-Why3).
